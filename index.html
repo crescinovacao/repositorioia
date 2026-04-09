@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Repositório de IA — Crescimentum</title>
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --vermelho: #001B71;
+    --vermelho-mid: #007BEA;
+    --vermelho-light: #eef5fd;
+    --vermelho-border: #b3d4f5;
+    --cinza-bg: #f4f6fb;
+    --cinza-card: #ffffff;
+    --cinza-text: #1a2340;
+    --cinza-muted: #6b7a99;
+    --cinza-border: #dce4f0;
+    --radius: 14px;
+    --radius-sm: 8px;
+    --font-display: 'Raleway', sans-serif;
+    --font-body: 'Aptos', Arial, sans-serif;
+    --azul-dark: #001B71;
+    --azul-mid: #007BEA;
+    --azul-light: #B3DFFF;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--cinza-bg);
+    color: var(--cinza-text);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    background: #001B71;
+    padding: 16px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .header-logo {
+    height: 40px;
+    width: auto;
+    filter: brightness(0) invert(1);
+  }
+
+  .header-divider {
+    width: 1px;
+    height: 32px;
+    background: rgba(255,255,255,0.3);
+  }
+
+  .header-title {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  .header-title .label {
+    font-family: var(--font-body);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.55);
+  }
+
+  .header-title h1 {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.02em;
+  }
+
+  .header-title h1 span {
+    color: var(--azul-light);
+  }
+
+  .btn-novo {
+    background: #fff;
+    color: var(--azul-dark);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 100px;
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn-novo:hover { background: var(--azul-light); }
+
+  .btn-novo::before { content: '+'; font-size: 18px; line-height: 1; }
+
+  /* FILTROS */
+  .filtros-bar {
+    background: #fff;
+    border-bottom: 1px solid var(--cinza-border);
+    padding: 14px 32px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .search-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 180px;
+    max-width: 320px;
+  }
+
+  .search-wrap input {
+    width: 100%;
+    background: var(--cinza-bg);
+    border: 1px solid var(--cinza-border);
+    border-radius: 100px;
+    padding: 8px 14px 8px 36px;
+    font-family: var(--font-body);
+    font-size: 14px;
+    color: var(--cinza-text);
+    outline: none;
+    transition: border 0.15s;
+  }
+
+  .search-wrap input:focus { border-color: var(--azul-mid); }
+
+  .search-wrap .icon-search {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--cinza-muted);
+    font-size: 14px;
+    pointer-events: none;
+  }
+
+  .filtro-chips {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .chip {
+    padding: 6px 14px;
+    border-radius: 100px;
+    border: 1px solid var(--cinza-border);
+    background: #fff;
+    font-size: 12px;
+    font-weight: 500;
+    font-family: var(--font-body);
+    cursor: pointer;
+    transition: all 0.15s;
+    color: var(--cinza-muted);
+  }
+
+  .chip:hover { border-color: var(--azul-mid); color: var(--azul-mid); }
+  .chip.ativo { background: var(--azul-dark); color: #fff; border-color: var(--azul-dark); }
+
+  .filtros-bar .sep { width: 1px; height: 24px; background: var(--cinza-border); }
+
+  /* STATS */
+  .stats-bar {
+    padding: 20px 32px 0;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .stat-card {
+    background: #fff;
+    border: 1px solid var(--cinza-border);
+    border-radius: var(--radius-sm);
+    padding: 12px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .stat-card .num {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--azul-dark);
+    line-height: 1;
+  }
+
+  .stat-card .desc {
+    font-size: 11px;
+    color: var(--cinza-muted);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  /* GRID */
+  .grid-container {
+    padding: 20px 32px 40px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 12px;
+    align-items: start;
+  }
+
+  /* CARD */
+  .card {
+    background: var(--cinza-card);
+    border-radius: var(--radius);
+    border: 1px solid var(--cinza-border);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 12px;
+    transition: box-shadow 0.15s, border-color 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card:hover {
+    border-color: var(--vermelho-border);
+    box-shadow: 0 4px 20px rgba(0,27,113,0.08);
+  }
+
+  .card-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .card-nome {
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--azul-dark);
+    line-height: 1.2;
+    margin-bottom: 6px;
+  }
+
+  .card-desc-wrap {
+    margin-bottom: 8px;
+  }
+
+  .card-desc {
+    font-size: 13px;
+    color: var(--cinza-muted);
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .card-desc.expandido {
+    display: block;
+    overflow: visible;
+  }
+
+  .ver-mais {
+    display: none;
+    background: none;
+    border: none;
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--azul-mid);
+    cursor: pointer;
+    padding: 4px 0 0;
+    text-align: left;
+  }
+
+  .ver-mais:hover { text-decoration: underline; }
+
+  .card-spacer { flex: 1; }
+
+  .card-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .tipo-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 100px;
+    white-space: nowrap;
+  }
+
+  .status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 4px;
+  }
+
+  .status-dot.ativo { background: #2ecc71; }
+  .status-dot.teste { background: #f39c12; }
+  .status-dot.arquivado { background: #bbb; }
+
+  .meta-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--cinza-muted);
+  }
+
+  .meta-row .label {
+    font-weight: 600;
+    color: var(--cinza-text);
+    min-width: 36px;
+  }
+
+  .card-footer {
+    display: flex;
+    gap: 8px;
+    padding-top: 12px;
+    border-top: 1px solid var(--cinza-border);
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .link-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--azul-dark);
+    text-decoration: none;
+    padding: 5px 12px;
+    border: 1px solid var(--vermelho-border);
+    border-radius: 100px;
+    background: var(--vermelho-light);
+    transition: all 0.15s;
+  }
+
+  .link-btn:hover { background: var(--azul-mid); color: #fff; border-color: var(--azul-mid); }
+
+  .link-btn.secondary {
+    color: var(--cinza-muted);
+    border-color: var(--cinza-border);
+    background: var(--cinza-bg);
+  }
+
+  .link-btn.secondary:hover { background: var(--azul-mid); color: #fff; border-color: var(--azul-mid); }
+
+  .criado-por {
+    font-size: 11px;
+    color: var(--cinza-muted);
+  }
+
+  .card-actions {
+    display: flex;
+    gap: 6px;
+  }
+
+  .action-btn {
+    background: none;
+    border: 1px solid var(--cinza-border);
+    border-radius: var(--radius-sm);
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.15s;
+    color: var(--cinza-muted);
+  }
+
+  .action-btn:hover { border-color: var(--azul-mid); color: var(--azul-mid); background: var(--vermelho-light); }
+  .action-btn.del:hover { border-color: #c0392b; color: #c0392b; background: #fdf0ef; }
+
+  /* EMPTY */
+  .empty {
+    grid-column: 1/-1;
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--cinza-muted);
+  }
+
+  .empty .icon { font-size: 48px; margin-bottom: 16px; }
+  .empty p { font-size: 15px; }
+
+  /* LOADING */
+  .loading {
+    grid-column: 1/-1;
+    text-align: center;
+    padding: 60px;
+    color: var(--cinza-muted);
+    font-size: 14px;
+  }
+
+  .spinner {
+    width: 32px; height: 32px;
+    border: 3px solid var(--cinza-border);
+    border-top-color: var(--azul-mid);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin: 0 auto 16px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(33,0,0,0.4);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+
+  .modal-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .modal {
+    background: #fff;
+    border-radius: var(--radius);
+    width: 100%;
+    max-width: 540px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    transform: translateY(20px);
+    transition: transform 0.2s;
+  }
+
+  .modal-overlay.open .modal { transform: translateY(0); }
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .modal-header h2 {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--azul-dark);
+  }
+
+  .modal-close {
+    background: none;
+    border: none;
+    font-size: 22px;
+    cursor: pointer;
+    color: var(--cinza-muted);
+    line-height: 1;
+    padding: 4px;
+  }
+
+  .modal-close:hover { color: var(--azul-dark); }
+
+  .form-grid { display: flex; flex-direction: column; gap: 16px; }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .field { display: flex; flex-direction: column; gap: 6px; }
+
+  .field label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--cinza-text);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .field input,
+  .field select,
+  .field textarea {
+    border: 1px solid var(--cinza-border);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    font-family: var(--font-body);
+    font-size: 14px;
+    color: var(--cinza-text);
+    background: var(--cinza-bg);
+    outline: none;
+    transition: border 0.15s;
+    width: 100%;
+  }
+
+  .field input:focus,
+  .field select:focus,
+  .field textarea:focus { border-color: var(--azul-mid); background: #fff; }
+
+  .field textarea { resize: vertical; min-height: 80px; }
+
+  .btn-salvar {
+    background: var(--azul-dark);
+    color: #fff;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 100px;
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s;
+    align-self: flex-end;
+  }
+
+  .btn-salvar:hover { background: var(--azul-mid); }
+  .btn-salvar:disabled { opacity: 0.5; cursor: default; }
+
+  /* TIPO COLORS */
+  .tipo-assistente_interno { background: #f2eafd; color: #A261E1; border: 1px solid #c9a0ee; }
+  .tipo-assistente_externo { background: #e6f5ee; color: #009EAA; border: 1px solid #9fd4b8; }
+  .tipo-dinamica { background: #fff3d6; color: #FF8C3E; border: 1px solid #f5d07a; }
+  .tipo-exercicio { background: #fde8f0; color: #E8406A; border: 1px solid #f5a8c8; }
+  .tipo-ferramenta { background: #edf5e6; color: #4CAF50; border: 1px solid #b0d88a; }
+  .tipo-outro { background: #e6f0fb; color: #007BEA; border: 1px solid #b3cef0; }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--azul-dark);
+    color: #fff;
+    padding: 10px 24px;
+    border-radius: 100px;
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 600;
+    z-index: 999;
+    transition: transform 0.3s;
+    white-space: nowrap;
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* RESPONSIVE */
+  @media (max-width: 600px) {
+    header { padding: 16px 20px; }
+    .filtros-bar { padding: 12px 20px; }
+    .grid-container { padding: 16px 20px 40px; grid-template-columns: 1fr; }
+    .stats-bar { padding: 16px 20px 0; }
+    .form-row { grid-template-columns: 1fr; }
+    .modal { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <img class="header-logo" src="https://i.imgur.com/LU8FtBY.png" alt="Crescimentum">
+    <div class="header-divider"></div>
+    <div class="header-title">
+      <span class="label">Inovação & IA</span>
+      <h1>Repositório de <span>IA</span></h1>
+    </div>
+  </div>
+  <button class="btn-novo" onclick="abrirModal()">Cadastrar</button>
+</header>
+
+<div class="filtros-bar">
+  <div class="search-wrap">
+    <svg class="icon-search" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" id="busca" placeholder="Buscar por nome, área..." oninput="filtrar()">
+  </div>
+  <div class="sep"></div>
+  <div class="filtro-chips">
+    <button class="chip ativo" onclick="setFiltroTipo('', this)">Todos</button>
+    <button class="chip" onclick="setFiltroTipo('assistente-interno', this)">Assistentes internos</button>
+    <button class="chip" onclick="setFiltroTipo('assistente-externo', this)">Assistentes externos</button>
+    <button class="chip" onclick="setFiltroTipo('dinamica', this)">Dinâmicas</button>
+    <button class="chip" onclick="setFiltroTipo('exercicio', this)">Exercícios</button>
+    <button class="chip" onclick="setFiltroTipo('ferramenta', this)">Ferramentas</button>
+    <button class="chip" onclick="setFiltroTipo('outro', this)">Outros</button>
+  </div>
+  <div class="sep"></div>
+  <div class="filtro-chips">
+    <button class="chip ativo" id="chipTodosStatus" onclick="setFiltroStatus('', this)">Qualquer status</button>
+    <button class="chip" onclick="setFiltroStatus('ativo', this)">Ativos</button>
+    <button class="chip" onclick="setFiltroStatus('teste', this)">Em teste</button>
+    <button class="chip" onclick="setFiltroStatus('arquivado', this)">Arquivados</button>
+  </div>
+</div>
+
+
+
+<div class="grid-container" id="grid">
+  <div class="loading"><div class="spinner"></div>Carregando repositório...</div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="fecharModalFora(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modalTitulo">Novo cadastro</h2>
+      <button class="modal-close" onclick="fecharModal()">✕</button>
+    </div>
+    <div class="form-grid">
+      <div class="field">
+        <label>Nome *</label>
+        <input type="text" id="fNome" placeholder="Ex: Assistente de Feedback">
+      </div>
+      <div class="field">
+        <label>Descrição *</label>
+        <textarea id="fDesc" placeholder="Para que serve? Como funciona?"></textarea>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label>Tipo *</label>
+          <select id="fTipo">
+            <option value="">Selecionar...</option>
+            <option value="assistente-interno">Assistente interno</option>
+            <option value="assistente-externo">Assistente externo</option>
+            <option value="dinamica">Dinâmica</option>
+            <option value="exercicio">Exercício</option>
+            <option value="ferramenta">Ferramenta</option>
+            <option value="outro">Outro</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Status *</label>
+          <select id="fStatus">
+            <option value="">Selecionar...</option>
+            <option value="ativo">Ativo</option>
+            <option value="teste">Em teste</option>
+            <option value="arquivado">Arquivado</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label>Quem criou *</label>
+          <input type="text" id="fCriador" placeholder="Nome da pessoa">
+        </div>
+        <div class="field">
+          <label>Área responsável</label>
+          <input type="text" id="fArea" placeholder="Ex: Conteúdo, Tech...">
+        </div>
+      </div>
+      <div class="field">
+        <label>Link de acesso</label>
+        <input type="url" id="fLink" placeholder="https://...">
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label>Login</label>
+          <input type="text" id="fLogin" placeholder="usuário ou e-mail">
+        </div>
+        <div class="field">
+          <label>Senha</label>
+          <input type="text" id="fSenha" placeholder="senha de acesso">
+        </div>
+      </div>
+      <div class="field">
+        <label>Material base</label>
+        <input type="url" id="fArquivos" placeholder="Drive, Notion, GitHub... (prompts, docs, etc.)">
+      </div>
+      <div class="field">
+        <label>Observações</label>
+        <textarea id="fObs" placeholder="Contexto, limitações, instrução de uso..."></textarea>
+      </div>
+    </div>
+    <button class="btn-salvar" id="btnSalvar" onclick="salvar()">Salvar</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, set, get, onValue, push, remove, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyB7O-0pxrb_hGKHigkQNdC851fysxl5Z_8",
+  authDomain: "teste-jogo-crescimentum.firebaseapp.com",
+  databaseURL: "https://teste-jogo-crescimentum-default-rtdb.firebaseio.com",
+  projectId: "teste-jogo-crescimentum",
+  storageBucket: "teste-jogo-crescimentum.firebasestorage.app",
+  messagingSenderId: "506040174576",
+  appId: "1:506040174576:web:8dc39cb8243c9947207f35"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const dbRef = ref(db, 'repositorio-ia');
+
+let todos = [];
+let filtroTipo = '';
+let filtroStatus = '';
+let editandoId = null;
+
+// Labels
+const tipoLabel = { 'assistente-interno':'Assistente interno', 'assistente-externo':'Assistente externo', dinamica:'Dinâmica', exercicio:'Exercício', ferramenta:'Ferramenta', outro:'Outro' };
+const statusLabel = { ativo:'Ativo', teste:'Em teste', arquivado:'Arquivado' };
+
+// Listen
+onValue(dbRef, (snap) => {
+  todos = [];
+  if (snap.exists()) {
+    snap.forEach(child => {
+      todos.push({ id: child.key, ...child.val() });
+    });
+    todos.sort((a,b) => (b.criadoEm||0) - (a.criadoEm||0));
+  }
+  renderizar();
+});
+
+window.abrirModal = function(id) {
+  editandoId = id || null;
+  document.getElementById('modalTitulo').textContent = id ? 'Editar cadastro' : 'Novo cadastro';
+  if (id) {
+    const item = todos.find(t => t.id === id);
+    if (item) {
+      document.getElementById('fNome').value = item.nome || '';
+      document.getElementById('fDesc').value = item.descricao || '';
+      document.getElementById('fTipo').value = item.tipo || '';
+      document.getElementById('fStatus').value = item.status || '';
+      document.getElementById('fCriador').value = item.criador || '';
+      document.getElementById('fArea').value = item.area || '';
+      document.getElementById('fLink').value = item.link || '';
+      document.getElementById('fLogin').value = item.login || '';
+      document.getElementById('fSenha').value = item.senha || '';
+      document.getElementById('fArquivos').value = item.arquivos || '';
+      document.getElementById('fObs').value = item.obs || '';
+    }
+  } else {
+    ['fNome','fDesc','fTipo','fStatus','fCriador','fArea','fLink','fLogin','fSenha','fArquivos','fObs'].forEach(f => {
+      const el = document.getElementById(f);
+      el.value = '';
+    });
+  }
+  document.getElementById('modalOverlay').classList.add('open');
+};
+
+window.fecharModal = function() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  editandoId = null;
+};
+
+window.fecharModalFora = function(e) {
+  if (e.target === document.getElementById('modalOverlay')) fecharModal();
+};
+
+window.salvar = async function() {
+  const nome = document.getElementById('fNome').value.trim();
+  const descricao = document.getElementById('fDesc').value.trim();
+  const tipo = document.getElementById('fTipo').value;
+  const status = document.getElementById('fStatus').value;
+  const criador = document.getElementById('fCriador').value.trim();
+  const area = document.getElementById('fArea').value.trim();
+  const link = document.getElementById('fLink').value.trim();
+  const login = document.getElementById('fLogin').value.trim();
+  const senha = document.getElementById('fSenha').value.trim();
+  const arquivos = document.getElementById('fArquivos').value.trim();
+  const obs = document.getElementById('fObs').value.trim();
+
+  if (!nome || !descricao || !tipo || !status || !criador) {
+    showToast('Preencha os campos obrigatórios *', '#c0392b');
+    return;
+  }
+
+  const btn = document.getElementById('btnSalvar');
+  btn.disabled = true;
+  btn.textContent = 'Salvando...';
+
+  const dados = { nome, descricao, tipo, status, criador, area, link, login, senha, arquivos, obs };
+
+  try {
+    if (editandoId) {
+      await update(ref(db, `repositorio-ia/${editandoId}`), dados);
+      showToast('Cadastro atualizado!');
+    } else {
+      dados.criadoEm = Date.now();
+      await push(dbRef, dados);
+      showToast('Cadastro salvo!');
+    }
+    fecharModal();
+  } catch(e) {
+    showToast('Erro ao salvar', '#c0392b');
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Salvar';
+};
+
+window.excluir = async function(id) {
+  if (!confirm('EI CRESCILOVER! 👀\n\nVocê tem certeza que quer apagar esse cadastro? Porque depois não tem como voltar atrás, viu?\n\nDiquinha: muda o status pra "Arquivado" e ele some da vista mas continua salvo. Bem mais seguro! 😉\n\nAinda assim quer apagar?')) return;
+  await remove(ref(db, `repositorio-ia/${id}`));
+  showToast('Cadastro removido');
+};
+
+window.filtrar = function() { renderizar(); };
+
+window.setFiltroTipo = function(tipo, el) {
+  filtroTipo = tipo;
+  document.querySelectorAll('.filtro-chips .chip').forEach(c => {
+    if (c.textContent.includes('Qualquer') || c.textContent.includes('Ativos') || c.textContent.includes('Em teste') || c.textContent.includes('Arquivados')) return;
+    c.classList.remove('ativo');
+  });
+  el.classList.add('ativo');
+  renderizar();
+};
+
+window.setFiltroStatus = function(status, el) {
+  filtroStatus = status;
+  document.querySelectorAll('.filtro-chips .chip').forEach(c => {
+    if (!c.textContent.includes('Qualquer') && !c.textContent.includes('Ativos') && !c.textContent.includes('Em teste') && !c.textContent.includes('Arquivados')) return;
+    c.classList.remove('ativo');
+  });
+  el.classList.add('ativo');
+  renderizar();
+};
+
+
+function renderizar() {
+  const busca = document.getElementById('busca').value.toLowerCase();
+  const filtrados = todos.filter(item => {
+    const matchBusca = !busca || item.nome?.toLowerCase().includes(busca) || item.descricao?.toLowerCase().includes(busca) || item.criador?.toLowerCase().includes(busca) || item.area?.toLowerCase().includes(busca);
+    const matchTipo = !filtroTipo || item.tipo === filtroTipo;
+    const matchStatus = !filtroStatus || item.status === filtroStatus;
+    return matchBusca && matchTipo && matchStatus;
+  });
+
+  const grid = document.getElementById('grid');
+
+  if (filtrados.length === 0) {
+    grid.innerHTML = `<div class="empty"><p>${todos.length === 0 ? 'Nenhum cadastro ainda.<br>Clique em <strong>Cadastrar</strong> para começar!' : 'Nenhum resultado para esses filtros.'}</p></div>`;
+    return;
+  }
+
+  grid.innerHTML = filtrados.map(item => {
+    const tipoClass = 'tipo-' + (item.tipo || 'outro').replace(/-/g, '_');
+    const statusClass = item.status || 'arquivado';
+    const data = item.criadoEm ? new Date(item.criadoEm).toLocaleDateString('pt-BR', { day:'2-digit', month:'short', year:'numeric' }) : '';
+
+    return `
+    <div class="card">
+      <div class="card-body">
+        <div class="card-top">
+          <span class="tipo-badge ${tipoClass}">${tipoLabel[item.tipo] || 'Outro'}</span>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="status-dot ${statusClass}" title="${statusLabel[item.status]||''}"></span>
+            <span style="font-size:11px;color:var(--cinza-muted);">${statusLabel[item.status]||''}</span>
+          </div>
+        </div>
+        <div class="card-nome">${item.nome}</div>
+        <div class="card-desc-wrap">
+          <div class="card-desc" id="desc-${item.id}">${item.descricao}</div>
+          <button class="ver-mais" id="vermais-${item.id}" onclick="toggleDesc('${item.id}')">Ver mais</button>
+        </div>
+      </div>
+      <div class="card-meta">
+        <div class="meta-row"><span class="label">Criado por</span>${item.criador}${item.area ? ` · ${item.area}` : ''}</div>
+        ${item.obs ? `<div class="meta-row" style="font-style:italic;">${item.obs}</div>` : ''}
+      </div>
+      <div class="card-footer">
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          ${item.link ? `<a class="link-btn" href="${item.link}" target="_blank">Acessar</a>` : ''}
+          ${item.arquivos ? `<a class="link-btn secondary" href="${item.arquivos}" target="_blank">Material base</a>` : ''}
+          ${!item.link && !item.arquivos ? '<span style="font-size:12px;color:var(--cinza-muted)">Sem links</span>' : ''}
+        </div>
+        <div class="card-actions">
+          <button class="action-btn" onclick="abrirModal('${item.id}')" title="Editar">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+          <button class="action-btn del" onclick="excluir('${item.id}')" title="Excluir">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+          </button>
+        </div>
+      </div>
+      ${(item.login || item.senha) ? `
+      <div style="border-top:1px solid var(--cinza-border);padding-top:10px;display:flex;flex-direction:column;gap:4px;">
+        ${item.login ? `<div class="meta-row"><span class="label">Login</span>${item.login}</div>` : ''}
+        ${item.senha ? `<div class="meta-row"><span class="label">Senha</span><span style="font-family:monospace;letter-spacing:0.05em;">${item.senha}</span></div>` : ''}
+      </div>` : ''}
+    </div>`;
+  }).join('');
+  setTimeout(() => requestAnimationFrame(verificarBotoesVerMais), 50);
+}
+
+window.toggleDesc = function(id) {
+  const desc = document.getElementById('desc-' + id);
+  const btn = document.getElementById('vermais-' + id);
+  const expandido = desc.classList.toggle('expandido');
+  btn.textContent = expandido ? 'Ver menos' : 'Ver mais';
+};
+
+function verificarBotoesVerMais() {
+  document.querySelectorAll('.card-desc').forEach(desc => {
+    const id = desc.id.replace('desc-', '');
+    const btn = document.getElementById('vermais-' + id);
+    if (!btn) return;
+    if (desc.scrollHeight > desc.clientHeight + 2) {
+      btn.style.display = 'block';
+    } else {
+      btn.style.display = 'none';
+    }
+  });
+}
+
+function showToast(msg, color) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = color || '#001B71';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>
