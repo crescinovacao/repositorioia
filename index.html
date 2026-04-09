@@ -585,9 +585,102 @@
     .form-row { grid-template-columns: 1fr; }
     .modal { padding: 20px; }
   }
+
+  /* LOGIN */
+  #tela-login {
+    position: fixed;
+    inset: 0;
+    background: #001B71;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .login-logo { height: 36px; width: auto; filter: brightness(0) invert(1); }
+
+  .login-box {
+    background: #fff;
+    border-radius: var(--radius);
+    padding: 36px 40px;
+    width: 100%;
+    max-width: 360px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .login-box h2 {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--azul-dark);
+    text-align: center;
+  }
+
+  .login-box p {
+    font-size: 13px;
+    color: var(--cinza-muted);
+    text-align: center;
+    margin-top: -8px;
+  }
+
+  .login-box input {
+    width: 100%;
+    border: 1px solid var(--cinza-border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    font-family: var(--font-body);
+    font-size: 15px;
+    color: var(--cinza-text);
+    background: var(--cinza-bg);
+    outline: none;
+    transition: border 0.15s;
+    text-align: center;
+    letter-spacing: 0.12em;
+  }
+
+  .login-box input:focus { border-color: var(--azul-mid); background: #fff; }
+
+  .btn-entrar {
+    background: var(--azul-dark);
+    color: #fff;
+    border: none;
+    padding: 12px;
+    border-radius: 100px;
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s;
+    width: 100%;
+  }
+
+  .btn-entrar:hover { background: var(--azul-mid); }
+  .btn-entrar:disabled { opacity: 0.5; cursor: default; }
+
+  .login-erro {
+    font-size: 13px;
+    color: #c0392b;
+    text-align: center;
+    min-height: 18px;
+  }
 </style>
 </head>
 <body>
+
+<div id="tela-login">
+  <img class="login-logo" src="https://i.imgur.com/LU8FtBY.png" alt="Crescimentum">
+  <div class="login-box">
+    <h2>Repositório de IA</h2>
+    <p>Digite a senha para acessar</p>
+    <input type="password" id="inputSenha" placeholder="••••••••" onkeydown="if(event.key==='Enter') tentarEntrar()">
+    <button class="btn-entrar" id="btnEntrar" onclick="tentarEntrar()">Entrar</button>
+    <div class="login-erro" id="loginErro">Senha incorreta. Tenta de novo! 😅</div>
+  </div>
+</div>
 
 <header>
   <div class="header-left">
@@ -727,6 +820,47 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const dbRef = ref(db, 'repositorio-ia');
 
+// AUTH
+const senhaRef = ref(db, 'config/senha');
+
+async function tentarEntrar() {
+  const input = document.getElementById('inputSenha').value.trim();
+  const btn = document.getElementById('btnEntrar');
+  const erro = document.getElementById('loginErro');
+  if (!input) return;
+  btn.disabled = true;
+  btn.textContent = 'Verificando...';
+  erro.style.display = 'none';
+  try {
+    const snap = await get(senhaRef);
+    if (!snap.exists()) {
+      await set(senhaRef, 'cresci2026');
+    }
+    const senhaCorreta = snap.exists() ? snap.val() : 'cresci2026';
+    if (input === senhaCorreta) {
+      sessionStorage.setItem('repositorio-auth', 'ok');
+      document.getElementById('tela-login').style.display = 'none';
+      iniciar();
+    } else {
+      erro.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Entrar';
+    }
+  } catch(e) {
+    erro.textContent = 'Erro de conexão. Acesse pelo link do site! 🔗';
+    erro.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Entrar';
+  }
+}
+window.tentarEntrar = tentarEntrar;
+
+if (sessionStorage.getItem('repositorio-auth') === 'ok') {
+  document.getElementById('tela-login').style.display = 'none';
+  iniciar();
+}
+
+function iniciar() {
 let todos = [];
 let filtroTipo = '';
 let filtroStatus = '';
@@ -948,6 +1082,7 @@ function showToast(msg, color) {
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 3000);
 }
+} // fim iniciar
 </script>
 </body>
 </html>
