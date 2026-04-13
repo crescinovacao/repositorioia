@@ -111,6 +111,7 @@
   .btn-novo:hover { background: var(--azul-light); }
 
   .btn-novo::before { content: '+'; font-size: 18px; line-height: 1; }
+
   .header-actions { display: flex; gap: 8px; align-items: center; }
 
   .btn-exportar, .btn-importar {
@@ -128,9 +129,7 @@
     align-items: center;
     gap: 6px;
   }
-
   .btn-exportar:hover, .btn-importar:hover { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.6); }
-
   @media (max-width: 600px) { .btn-exportar span, .btn-importar span { display: none; } }
 
   /* FILTROS */
@@ -241,7 +240,7 @@
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     gap: 12px;
-    align-items: start;
+    align-items: stretch;
   }
 
   /* CARD */
@@ -715,19 +714,11 @@
   </div>
   <div class="header-actions">
     <button class="btn-exportar" onclick="exportarExcel()">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-        <polyline points="7 10 12 15 17 10"/>
-        <line x1="12" y1="15" x2="12" y2="3"/>
-      </svg>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       <span>Exportar</span>
     </button>
     <button class="btn-importar" onclick="document.getElementById('inputImportar').click()">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-        <polyline points="7 10 12 15 17 10"/>
-        <line x1="12" y1="15" x2="12" y2="3"/>
-      </svg>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 10 12 5 7 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       <span>Importar</span>
     </button>
     <input type="file" id="inputImportar" accept=".xlsx,.xls" style="display:none" onchange="importarExcel(event)">
@@ -861,39 +852,29 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const dbRef = ref(db, 'repositorio-ia');
 
-// Array no escopo do módulo — acessível pelo exportar e importar
 let todos = [];
 
-const tipoLabelGlobal = { 'assistente-interno':'Assistente interno', 'assistente-externo':'Assistente externo', dinamica:'Dinâmica', exercicio:'Exercício', ferramenta:'Ferramenta', outro:'Outro' };
-const statusLabelGlobal = { ativo:'Ativo', teste:'Em teste', arquivado:'Arquivado' };
+const _tipoLabel   = { 'assistente-interno':'Assistente interno', 'assistente-externo':'Assistente externo', dinamica:'Dinâmica', exercicio:'Exercício', ferramenta:'Ferramenta', outro:'Outro' };
+const _statusLabel = { ativo:'Ativo', teste:'Em teste', arquivado:'Arquivado' };
+const _tipoRev     = { 'Assistente interno':'assistente-interno', 'Assistente externo':'assistente-externo', 'Dinâmica':'dinamica', 'Exercício':'exercicio', 'Ferramenta':'ferramenta', 'Outro':'outro' };
+const _statusRev   = { 'Ativo':'ativo', 'Em teste':'teste', 'Arquivado':'arquivado' };
 
-// Mapeamento de colunas do Excel para campos internos
-const COLUNAS = {
-  'Nome': 'nome',
-  'Descrição': 'descricao',
-  'Tipo': 'tipo',
-  'Status': 'status',
-  'Criado por': 'criador',
-  'Área responsável': 'area',
-  'Link de acesso': 'link',
-  'Login': 'login',
-  'Senha': 'senha',
-  'Material base': 'arquivos',
-  'Observações': 'obs'
-};
+function _toast(msg, color, dur) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = color || '#001B71';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), dur || 3500);
+}
 
-// Mapeamento reverso: label legível → valor interno
-const TIPO_REVERSO = { 'Assistente interno':'assistente-interno', 'Assistente externo':'assistente-externo', 'Dinâmica':'dinamica', 'Exercício':'exercicio', 'Ferramenta':'ferramenta', 'Outro':'outro' };
-const STATUS_REVERSO = { 'Ativo':'ativo', 'Em teste':'teste', 'Arquivado':'arquivado' };
-
-// ── EXPORTAR ─────────────────────────────────────────────────────
+// ── EXPORTAR ────────────────────────────────────────────────────
 window.exportarExcel = function() {
-  if (todos.length === 0) { showToastGlobal('Nenhum cadastro para exportar', '#c0392b'); return; }
+  if (todos.length === 0) { _toast('Nenhum cadastro para exportar', '#c0392b'); return; }
   const linhas = todos.map(item => ({
     'Nome': item.nome || '',
     'Descrição': item.descricao || '',
-    'Tipo': tipoLabelGlobal[item.tipo] || item.tipo || '',
-    'Status': statusLabelGlobal[item.status] || item.status || '',
+    'Tipo': _tipoLabel[item.tipo] || item.tipo || '',
+    'Status': _statusLabel[item.status] || item.status || '',
     'Criado por': item.criador || '',
     'Área responsável': item.area || '',
     'Link de acesso': item.link || '',
@@ -909,14 +890,14 @@ window.exportarExcel = function() {
   XLSX.utils.book_append_sheet(wb, ws, 'Repositório de IA');
   const data = new Date().toLocaleDateString('pt-BR').replace(/\//g, '-');
   XLSX.writeFile(wb, `Repositório de IA — Crescimentum (${data}).xlsx`);
-  showToastGlobal(`${todos.length} cadastros exportados! 📊`);
+  _toast(`${todos.length} cadastros exportados! 📊`);
 };
 
-// ── IMPORTAR ─────────────────────────────────────────────────────
+// ── IMPORTAR ────────────────────────────────────────────────────
 window.importarExcel = async function(event) {
   const file = event.target.files[0];
   if (!file) return;
-  event.target.value = ''; // limpa input para permitir reimportar o mesmo arquivo
+  event.target.value = '';
 
   const reader = new FileReader();
   reader.onload = async function(e) {
@@ -925,77 +906,55 @@ window.importarExcel = async function(event) {
       const ws = wb.Sheets[wb.SheetNames[0]];
       const linhas = XLSX.utils.sheet_to_json(ws, { defval: '' });
 
-      if (linhas.length === 0) { showToastGlobal('Planilha vazia!', '#c0392b'); return; }
+      if (linhas.length === 0) { _toast('Planilha vazia!', '#c0392b'); return; }
 
-      // Validar que tem ao menos as colunas obrigatórias
-      const primeiraLinha = linhas[0];
-      const obrigatorias = ['Nome', 'Descrição', 'Tipo', 'Status', 'Criado por'];
-      const faltando = obrigatorias.filter(col => !(col in primeiraLinha));
-      if (faltando.length > 0) {
-        showToastGlobal(`Colunas faltando: ${faltando.join(', ')}`, '#c0392b');
-        return;
-      }
+      const nomesExistentes = new Set(todos.map(t => (t.nome || '').trim().toLowerCase()));
 
       let importados = 0;
-      let erros = 0;
+      let duplicados = 0;
 
       for (const linha of linhas) {
-        const nome = String(linha['Nome'] || '').trim();
-        const descricao = String(linha['Descrição'] || '').trim();
-        const tipoRaw = String(linha['Tipo'] || '').trim();
-        const statusRaw = String(linha['Status'] || '').trim();
-        const criador = String(linha['Criado por'] || '').trim();
+        // Pula só se a linha estiver completamente vazia
+        const valores = Object.values(linha).map(v => String(v).trim()).filter(v => v);
+        if (valores.length === 0) continue;
 
-        // Pular linhas sem campos obrigatórios
-        if (!nome || !descricao || !tipoRaw || !statusRaw || !criador) { erros++; continue; }
+        const nome    = String(linha['Nome'] || '').trim();
+        const ehDuplicata = nome && nomesExistentes.has(nome.toLowerCase());
 
-        // Converter label legível para valor interno (aceita os dois formatos)
-        const tipo = TIPO_REVERSO[tipoRaw] || tipoRaw;
-        const status = STATUS_REVERSO[statusRaw] || statusRaw;
+        let obs = String(linha['Observações'] || '').trim();
+        if (ehDuplicata) {
+          obs = obs ? `[DUPLICADO] ${obs}` : '[DUPLICADO] Cadastro importado com nome já existente no repositório.';
+          duplicados++;
+        }
 
         const dados = {
           nome,
-          descricao,
-          tipo,
-          status,
-          criador,
-          area: String(linha['Área responsável'] || '').trim(),
-          link: String(linha['Link de acesso'] || '').trim(),
-          login: String(linha['Login'] || '').trim(),
-          senha: String(linha['Senha'] || '').trim(),
-          arquivos: String(linha['Material base'] || '').trim(),
-          obs: String(linha['Observações'] || '').trim(),
-          criadoEm: Date.now()
+          descricao: String(linha['Descrição'] || '').trim(),
+          tipo:      _tipoRev[String(linha['Tipo'] || '').trim()] || String(linha['Tipo'] || '').trim() || 'outro',
+          status:    _statusRev[String(linha['Status'] || '').trim()] || String(linha['Status'] || '').trim() || 'ativo',
+          criador:   String(linha['Criado por'] || '').trim(),
+          area:      String(linha['Área responsável'] || '').trim(),
+          link:      String(linha['Link de acesso'] || '').trim(),
+          login:     String(linha['Login'] || '').trim(),
+          senha:     String(linha['Senha'] || '').trim(),
+          arquivos:  String(linha['Material base'] || '').trim(),
+          obs,
+          criadoEm:  Date.now()
         };
 
-        try {
-          await push(dbRef, dados);
-          importados++;
-        } catch(err) {
-          erros++;
-        }
+        try { await push(dbRef, dados); importados++; } catch(err) {}
       }
 
-      if (erros > 0) {
-        showToastGlobal(`${importados} importados, ${erros} ignorados (campos obrigatórios vazios)`);
-      } else {
-        showToastGlobal(`${importados} cadastros importados com sucesso! 🎉`);
-      }
+      let msg = `${importados} cadastro${importados !== 1 ? 's' : ''} importado${importados !== 1 ? 's' : ''}!`;
+      if (duplicados > 0) msg += ` (${duplicados} duplicado${duplicados !== 1 ? 's' : ''} marcado${duplicados !== 1 ? 's' : ''})`;
+      _toast(msg, '#001B71', 5000);
 
     } catch(err) {
-      showToastGlobal('Erro ao ler o arquivo. Verifique o formato.', '#c0392b');
+      _toast('Erro ao ler o arquivo. Verifique o formato.', '#c0392b');
     }
   };
   reader.readAsArrayBuffer(file);
 };
-
-function showToastGlobal(msg, color) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.style.background = color || '#001B71';
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 4000);
-}
 
 // AUTH
 const senhaRef = ref(db, 'config/senha');
@@ -1055,7 +1014,6 @@ onValue(dbRef, (snap) => {
     });
     todos.sort((a,b) => (b.criadoEm||0) - (a.criadoEm||0));
   }
-  todos = todos; // já é o mesmo array do escopo do módulo
   renderizar();
 });
 
